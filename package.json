@@ -10,8 +10,7 @@
   },
   "scripts": {
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "format:check": "prettier --check ."
   },
   "config": {
     "commitizen": {
