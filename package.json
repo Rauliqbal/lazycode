@@ -14,10 +14,10 @@
     "prepare": "husky install"
   },
   "config": {
-  "commitizen": {
-    "path": "cz-conventional-changelog"
-  }
-},
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
   "keywords": [
     "lazycode",
     "express-js",
@@ -36,7 +36,6 @@
     "chalk": "^5.4.1",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "husky": "^8.0.0",
     "prettier": "^3.4.2"
   },
   "dependencies": {
