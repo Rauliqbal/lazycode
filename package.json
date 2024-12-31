@@ -1,0 +1,36 @@
+{
+  "name": "lazycode",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "lazycode": "./index.js"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "lazycode",
+    "express-js",
+    "react-js",
+    "front-end",
+    "back-end",
+    "full-stack",
+    "framework",
+    "cli",
+    "generator",
+    "command-line"
+  ],
+  "author": "Rauliqbal",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "chalk": "^5.4.1",
+    "prettier": "^3.4.2"
+  },
+  "dependencies": {
+    "giget": "^1.2.3",
+    "inquirer": "^12.3.0",
+    "ora": "^8.1.1"
+  }
+}
