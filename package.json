@@ -2,13 +2,22 @@
   "name": "lazycode",
   "version": "1.0.0",
   "type": "module",
+  "author": "Rauliqbal",
+  "license": "MIT",
+  "description": "",
   "bin": {
     "lazycode": "./index.js"
   },
   "scripts": {
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky install"
   },
+  "config": {
+  "commitizen": {
+    "path": "cz-conventional-changelog"
+  }
+},
   "keywords": [
     "lazycode",
     "express-js",
@@ -21,11 +30,13 @@
     "generator",
     "command-line"
   ],
-  "author": "Rauliqbal",
-  "license": "MIT",
-  "description": "",
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
     "chalk": "^5.4.1",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.0",
     "prettier": "^3.4.2"
   },
   "dependencies": {
