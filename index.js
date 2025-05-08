@@ -1,110 +1,149 @@
 #!/usr/bin/env node
-import { promisify } from 'util';
-import { exec as _exec } from 'child_process';
-import { join } from 'path';
-import inquirer from 'inquirer';
-import { rm as _rm, existsSync, mkdirSync, rmSync } from 'fs';
-import ora from 'ora';
-import chalk from 'chalk';
-const exec = promisify(_exec);
-const rm = promisify(_rm);
+import { promisify } from 'util'
+import { exec as _exec } from 'child_process'
+import { join } from 'path'
+import inquirer from 'inquirer'
+import { rm as _rm, existsSync, mkdirSync, rmSync } from 'fs'
+import ora from 'ora'
+import chalk from 'chalk'
+
+const exec = promisify(_exec)
+const rm = promisify(_rm)
 const date = new Date()
+
+let projectPath = ''
+
+process.on('SIGINT', () => {
+  if (projectPath && existsSync(projectPath)) {
+    rmSync(projectPath, { recursive: true, force: true })
+    console.log(chalk.red('\n🧹 Folder project sementara dihapus.'))
+  }
+  console.log(
+    chalk.yellowBright('❌ Proses dibatalkan oleh pengguna (Ctrl + C).')
+  )
+  process.exit(0)
+})
 
 // ASCII ART
 const asciiArt = `
-██╗      █████╗ ███████╗██╗   ██╗ ██████╗ ██████╗ ██████╗ ███████╗
-██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝██╔════╝██╔═══██╗██╔══██╗██╔════╝
-██║     ███████║  ███╔╝  ╚████╔╝ ██║     ██║   ██║██║  ██║█████╗  
-██║     ██╔══██║ ███╔╝    ╚██╔╝  ██║     ██║   ██║██║  ██║██╔══╝  
-███████╗██║  ██║███████╗   ██║   ╚██████╗╚██████╔╝██████╔╝███████╗
-╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+  ╔═══╗──╔╗─────╔═══╗─────╔═╦╗
+  ║╔═╗║─╔╝╚╗────║╔═╗║─────║╔╝╚╗
+  ║╚═╝╠═╩╗╔╬═╦══╣║─╚╬═╦══╦╝╚╗╔╝
+  ║╔╗╔╣║═╣║║╔╣╔╗║║─╔╣╔╣╔╗╠╗╔╣║
+  ║║║╚╣║═╣╚╣║║╚╝║╚═╝║║║╔╗║║║║╚╗
+  ╚╝╚═╩══╩═╩╝╚══╩═══╩╝╚╝╚╝╚╝╚═╝
 `
 
-const greet = `
-                                                                   
-                 Halo, Selamat datang di Lazy Code                
-                    karya dari Rauliqbal ©${date.getFullYear()}    
-`
+// const greet = `
 
-// Question
+//                  ©Azuracoder ${date.getFullYear()}, Build Modern Frontends, Code the Future
+// `
+
 const question = [
   {
     type: 'input',
     name: 'project-name',
-    message: 'Lagi mau buat project apa bang ?',
-    default: 'my-project'
+    message: 'What is the name of your new project?',
+    default: 'my-project',
+    validate: (value) => {
+      if (value.includes(' ')) {
+        return 'Project name cannot contain spaces.'
+      }
+      if (!/^[a-zA-Z0-9-_]+$/.test(value)) {
+        return 'Only letters, numbers, dashes (-), and underscores (_) are allowed.'
+      }
+      return true
+    },
   },
   {
     type: 'list',
     name: 'project-template',
-    message: 'Mau buat project make stack apa nih?',
-    choices: ["NextJS", "NuxtJS", "ReactJS", "VueJS", "MERN", "MEVN"]
-  }, {
+    message: 'Pick your frontend stack of choice:',
+    choices: ['NextJS', 'NuxtJS', 'ReactJS', 'VueJS', 'MERN', 'MEVN'],
+  },
+  {
     type: 'list',
     name: 'package-manager',
-    message: 'apa package manager andalanmu ?',
-    choices: ['npm', 'pnpm', 'bun']
-  }
+    message: 'Choose your weapon (package manager):',
+    choices: ['npm', 'pnpm', 'bun'],
+  },
 ]
 
 console.log(chalk.blue(asciiArt))
 console.log(chalk.greenBright.bold(greet))
 
-inquirer.prompt(question).then(async (answers) => {
-  const projectName = answers["project-name"];
-  const projectTemplate = answers["project-template"];
-  const projectPackageManager = answers['package-manager']
-  const currentPath = process.cwd();
-  const projectPath = join(currentPath, projectName);
-
-
-  if (existsSync(projectPath)) {
-    console.log(`Yah ada nama projeck yg sama nih., tolong beri nama project lain yaa🙏🏻`)
-    process.exit(1)
-  } else {
-    mkdirSync(projectPath)
-  }
-
+// ✅ Bungkus prompt dan proses utama dalam try-catch
+const main = async () => {
   try {
+    const answers = await inquirer.prompt(question)
+    const projectName = answers['project-name']
+    const projectTemplate = answers['project-template']
+    const projectPackageManager = answers['package-manager']
+    const currentPath = process.cwd()
+    projectPath = join(currentPath, projectName)
+
+    if (existsSync(projectPath)) {
+      console.log(
+        chalk.redBright(
+          '🚫 A project with this name already exists. Please pick a unique name.'
+        )
+      )
+      process.exit(1)
+    } else {
+      mkdirSync(projectPath)
+    }
+
     // Clone Project
-    const gitLoading = ora('Mengunduh Projek🚀...').start()
-    await exec(`git clone --depth 1 https://github.com/Rauliqbal/${projectTemplate}-boilerplate.git ${projectPath} --quiet`)
+    const gitLoading = ora('📡 Downloading boilerplate... Please wait.').start()
+    await exec(
+      `git clone --depth 1 https://github.com/Rauliqbal/${projectTemplate}-boilerplate.git ${projectPath} --quiet`
+    )
     gitLoading.succeed()
 
     // Setup Directory
-    const setupLoading = ora('Mohon Bersabar lagi dibuatkan projek nya📦...')
-    const rmGit = rm(join(projectPath, ".git"), {
+    const setupLoading = ora('🛠️  Setting up your project...').start()
+    const rmGit = rm(join(projectPath, '.git'), {
       recursive: true,
       force: true,
-    });
-    const rmLicense = rm(join(projectPath, "LICENSE"), {
+    })
+    const rmLicense = rm(join(projectPath, 'LICENSE'), {
       recursive: true,
       force: true,
-    });
-    const rmLock = rm(join(projectPath, "package-lock.json"), {
+    })
+    const rmLock = rm(join(projectPath, 'package-lock.json'), {
       recursive: true,
       force: true,
-    });
-
-    await Promise.all([rmGit, rmLicense, rmLock]);
+    })
+    await Promise.all([rmGit, rmLicense, rmLock])
     process.chdir(projectPath)
     setupLoading.succeed()
 
-    // Install Depedencies
-    const installLoading = ora('Installing Depedencies♻️...').start()
+    // Install Dependencies
+    const installLoading = ora('📦 Installing dependencies...').start()
     await exec(`${projectPackageManager} install`)
     installLoading.succeed()
 
-    console.log("🎉Yeay, projekmu sudah siap🥳");
-    console.log(chalk.gray("Get started with:"));
-    console.log(chalk.green.bold(`    cd ${projectName}`));
-    console.log(chalk.green.bold(`    ${projectPackageManager} run dev`));
-    console.log("   ");
-    console.log(chalk.blue.bold(" Happy Coding cuy!👾 "));
-
-
+    console.log(chalk.greenBright('\n✅ Your project is ready to rock!'))
+    console.log(chalk.gray('\nGet started with:'))
+    console.log(chalk.cyan(`  cd ${projectName}`))
+    console.log(chalk.cyan(`  ${projectPackageManager} run dev\n`))
+    console.log(chalk.magentaBright('✨ Happy hacking! ✨'))
   } catch (error) {
-    rmSync(projectPath, { recursive: true, force: true });
-    console.log(error);
+    if (
+      error.isTtyError ||
+      error.message?.includes('force closed the prompt')
+    ) {
+      console.log(chalk.yellowBright('\n⚠️  Prompt cancelled.'))
+    } else {
+      console.error(chalk.red('❌ An error occurred in the CLI:'), error)
+    }
+
+    if (projectPath && existsSync(projectPath)) {
+      rmSync(projectPath, { recursive: true, force: true })
+    }
+
+    process.exit(0)
   }
-})
+}
+
+main()

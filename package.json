@@ -1,12 +1,12 @@
 {
-  "name": "lazycode",
+  "name": "retrocraft",
   "version": "1.0.0",
   "type": "module",
   "author": "Rauliqbal",
   "license": "MIT",
-  "description": "",
+  "description": "RetroCraft is a fun and nostalgic CLI tool to generate clean and structured front-end project setups using modern frameworks like React, Vue, Next.js, and Nuxt.js.",
   "bin": {
-    "lazycode": "./index.js"
+    "retrocraft": "./index.js"
   },
   "scripts": {
     "format": "prettier --write .",
@@ -18,7 +18,7 @@
     }
   },
   "keywords": [
-    "lazycode",
+    "retrocraft",
     "express-js",
     "react-js",
     "front-end",
